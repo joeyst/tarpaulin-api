@@ -1,8 +1,9 @@
 
 const { Router } = require('express')
-const { getImageDownloadStreamByFilename, getThumbnailDownloadStreamByFilename } = require('../models/photo')
 
 const router = Router()
+
+// TODO: Add /users/{id}, /users/login, /users 
 
 router.get('/images/:filename', (req, res, next) => {
   getImageDownloadStreamByFilename(req.params.filename)
