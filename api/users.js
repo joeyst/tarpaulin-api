@@ -3,11 +3,20 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { authenticateUser, addUserInfoToRequest } = require('../lib/jsonwebtoken.js')
+const { authenticateUser, addUserInfoToRequest } = require('../lib/jsonwebtoken')
+const { getUserInfoById } = require('../models/user')
 
 // TODO: Add /users/{id}, /users/login, /users 
 
-router.get('/:id', authenticateUser, addUserInfoToRequest, (req, res, next) => {
+async function checkUserExists(req, res, next) {
+  if (!!(await getUserInfoById(req.params.id))) {
+    next()
+  } else {
+    res.status(404).send("User not found.")
+  }
+}
+
+router.get('/:id', addUserInfoToRequest, authenticateUser, checkUserExists, async (req, res) => {
   /*
   Fetches data about a specific User. 
   case User role:
@@ -19,7 +28,7 @@ router.get('/:id', authenticateUser, addUserInfoToRequest, (req, res, next) => {
     res.status(200).send(await courseCollection.find({instructorId: "instructor"}))
   } else {
     const userCollection = getMongoCollection("users")
-    res.status(200).send(await userCollection.find({_id: req.user.id}))
+    res.status(200).send(await userCollection.find({_id: req.user.id}).then(user => user.courseIds))
   }
 })
 
