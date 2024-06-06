@@ -3,8 +3,8 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { authenticateUser, addUserInfoToRequest } = require('../lib/jsonwebtoken')
-const { getUserInfoById } = require('../models/user')
+const { checkRequestIdMatchesTokenId, addUserInfoToRequest } = require('../lib/jsonwebtoken')
+const { getUserInfoById, getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
 
 // TODO: Add /users/login, /users 
 
@@ -16,7 +16,22 @@ async function checkUserExists(req, res, next) {
   }
 }
 
-router.get('/:id', addUserInfoToRequest, authenticateUser, checkUserExists, async (req, res) => {
+function checkLoginFieldsExist(req, res, next) {
+  const { email, password } = req.body
+  if (!email || !password) {
+    res.status(400).send()
+  } 
+  next()
+}
+
+function checkUserPassword(req, res, next) {
+  if (!isUserPasswordCorrect(req.user.password, req.user.id)) {
+    res.status(401).send()
+  }
+  next()
+}
+
+router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
   /*
   Fetches data about a specific User. 
   case User role:
@@ -30,6 +45,13 @@ router.get('/:id', addUserInfoToRequest, authenticateUser, checkUserExists, asyn
     const userCollection = getMongoCollection("users")
     res.status(200).send(await userCollection.find({_id: req.user.id}).then(user => user.courseIds))
   }
+})
+
+router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res) => {
+  // TODO: Add check that User with email exists with 401 status response.
+  /* Sends {token: ...}. */
+  const { name, email, _id: id } = getUserInfoByEmail(req.user.email)
+  res.status(200).send({token: getJwtTokenFromUser({ name, email, id })})
 })
 
 router.get('/:filename', (req, res, next) => {
