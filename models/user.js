@@ -20,7 +20,7 @@ async function addUser(userObject): string {
   // TODO: Salt userObject.password with bcrypt's hashSync (mutate userObject). 
   return getMongoCollection('users')
     .insertOne(userObject)
-    .then(result => result.insertedId) // TODO: result.insertedId.toString()? 
+    .then(result => result.insertedId.toString()) // TODO: result.insertedId.toString()? 
 }
 
 exports.UserSchema = UserSchema
