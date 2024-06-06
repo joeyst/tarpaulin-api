@@ -11,17 +11,15 @@ const UserSchema = {
 }
 
 async function getUserInfoById(id) {
-  // TODO: Add check for id = requested user ID. 
   if (!ObjectId.isValid(id)) { return null }
   return await getMongoCollection('users').findOne({ _id: new ObjectId(id) })
 }
 
 async function addUser(userObject): string {
-  // TODO: Check if userObject.id == decoded user ID. 
   // TODO: Salt userObject.password with bcrypt's hashSync (mutate userObject). 
   return await getMongoCollection('users')
     .insertOne(userObject)
-    .then(result => result.insertedId.toString()) // TODO: result.insertedId.toString()? 
+    .then(result => result.insertedId.toString())
 }
 
 exports.UserSchema = UserSchema

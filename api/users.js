@@ -6,7 +6,7 @@ const router = Router()
 const { authenticateUser, addUserInfoToRequest } = require('../lib/jsonwebtoken')
 const { getUserInfoById } = require('../models/user')
 
-// TODO: Add /users/{id}, /users/login, /users 
+// TODO: Add /users/login, /users 
 
 async function checkUserExists(req, res, next) {
   if (!!(await getUserInfoById(req.params.id))) {
