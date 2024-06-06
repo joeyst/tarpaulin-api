@@ -9,4 +9,17 @@ const CourseSchema = {
   instructorId: { require: true}
 }
 
-exports.CourseSchema = CourseSchema
+async function getCourseInfoById(id) {
+  if (!ObjectId.isValid(id)) { return null }
+  return await getMongoCollection('courses').findOne({ _id: new ObjectId(id) })
+}
+
+async function getCourseList(query, options, limit) {
+  return await getMongoCollection('courses').find(query, options).limit(limit).toArray()
+}
+
+module.exports = {
+  CourseSchema,
+  getCourseInfoById,
+  getCourseList
+}
