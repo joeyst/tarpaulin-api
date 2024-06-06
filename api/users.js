@@ -7,8 +7,6 @@ const { checkRequestIdMatchesTokenId, addUserInfoToRequest } = require('../lib/j
 const { getUserInfoById, getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
 const { getJwtTokenDecoded } = require('../lib/jsonwebtoken')
 
-// TODO: Add /users/login, /users 
-
 async function checkUserExists(req, res, next) {
   if (!!(await getUserInfoById(req.params.id))) {
     next()
