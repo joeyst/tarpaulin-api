@@ -3,10 +3,11 @@ const { ObjectId } = require('mongodb')
 const { getMongoCollection } = require('../lib/mongo')
 
 const UserSchema = {
-  name: { require: true},
+  name: { require: true },
   email: { required: true },
   password: { required: true },
-  role: { required: true}
+  role: { required: true },
+  courseIds: { required: false }
 }
 
 async function getUserInfoById(id) {
