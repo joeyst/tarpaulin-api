@@ -32,10 +32,15 @@ async function isUserPasswordCorrect(password, id): Promise<boolean> {
   return comparePassword(password, storedPassword)
 }
 
+async function isUserExistsById(id): Promise<boolean> {
+  return !!(await getUserInfoById(id))
+}
+
 module.exports = {
   UserSchema,
   getUserInfoById,
   getUserInfoByEmail,
   addUser,
-  isUserPasswordCorrect
+  isUserPasswordCorrect,
+  isUserExistsById
 }

@@ -6,6 +6,7 @@ const router = Router()
 
 const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
 const { getAssignmentInfoById, AssignmentSchema } = require('../models/assignment')
+const { isUserExistsById } = require('../models/user')
 const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
 const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
@@ -40,6 +41,17 @@ async function appendAssignmentToBody(req, _, next) {
  next()
 }
 
+function replaceObjectIdWithString(object) {
+  object._id = object._id.toString()
+  return object 
+}
+
+function convertUnderscoreIdToId(object) {
+  object.id = object._id
+  delete object._id
+  return object
+}
+
 router.post('/', async (req, res) => {
   if (!hasSchemaRequiredAttributes(req.body, AssignmentSchema)) {
     res.status(400).send()
@@ -67,6 +79,7 @@ router.post('/', async (req, res) => {
 })
 
 router.get('/:id', checkAssignmentExists, async (req, res) => {
+  // TODO: Is this correct "summary data" (segun le specs). 
   const assignment = getAssignmentInfoById(req.params.id)
   res.status(200).send(assignment)
 })
@@ -85,147 +98,34 @@ router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCours
   res.status(204).send()
 })
 
-async function checkUserIsAdmin(req, res, next) {
-  // TODO: Replace req.token with authorization header? 
-  if (!(await isUserAdmin(req.token))) {
-    res.status(403).send()
-  }
-  next()
-}
+router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
+  const assignmentId        = req.params.id
+  var { studentId, page } = req.query.studentId 
 
-async function checkRequestBodyAgainstCourseSchema(req, res, next) {
-  if (!hasRequiredSchemaAttributes(req.body, CourseSchema)) {
-    res.status(400).send()
-  }
-  next()
-}
-
-async function appendCourseToBody(req, _, next) {
-  req.course = extractSchemaAttributes(req.body, CourseSchema)
-  next()
-}
-
-router.get('/', async (req, res) => {
-  /* page query parameter is 1-indexed, by OpenAPI specifications. */
-  // TODO: Spec doesn't mention if invalid query. Should send error response? 
-  const skipNumber = resultsPerPage * (parseInt(req.query.page) - 1) 
-  delete req.query.page
-  const courseList = await getCourseList(req.query, { skip: skipNumber }, resultsPerPage)
-  res.status(200).send(courseList)
-})
-
-router.post('/', checkUserIsAdmin, checkRequestBodyAgainstCourseSchema, appendCourseToBody, async(req, res) => {
-  const id = await addCourse(req.course)
-  res.status(201).send({ id })
-})
-
-router.get('/:id', checkCourseExists, async (req, res) => {
-  res.status(200).send(getCourseInfoById(req.params.id))
-})
-
-router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => {
-  if (!req.course || Object.keys(req.course).length === 0) {
-    res.status(400).send()
+  if (page !== null && isNan(parseInt(page))) {
+    res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
   }
 
-  const courseInfo = await getCourseInfoById(id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
+  page ||= 1
+  const skipNumber = resultsPerPage * (parseInt(page) - 1) 
+
+  const options = { assignmentId }
+  if (
+    studentId !== null && 
+    (!ObjectId.isValid(studentId) || await isUserExistsById(studentId))
+  ) {
+    res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
   }
 
-  await partialUpdateCourse(id, req.course)
-  res.status(200).send()
-})
-
-router.delete('/:id', checkCourseExists, checkUserIsAdmin, async (req, res) => {
-  res.status(204).send()
-})
-
-router.get('/:id/students', checkCourseExists, async (req, res) => {
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
+  if (studentId !== null) {
+    options.studentId = studentId
   }
 
-  const studentIds = await getMongoCollection('users')
-    .find({ courseIds: req.params.id }, { name: 0, email: 0, password: 0, role: 0, courseIds: 0 }).toArray()
-    .then(results => results.map(result => result._id))
-
-  res.status(200).send(studentIds)
-})
-
-router.post('/:id/students', checkCourseExists, async (req, res) => {
-  /*
-  req.body => { add, remove } 
-  */ 
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  // TODO: Add check for add and remove not being null and not being list. Status code 400? 
-
-  let { add, remove } = req.body 
-
-  const userCollection = getMongoCollection('users')
-
-  // TODO: Which order do we add and remove in? Should we handle if userId is in both add and remove? 
-  userCollection.updateMany(
-    { _id: { $in: add || [] }},
-    { $addToSet: { courseIds: req.params.id } }
-  )
-
-  userCollection.updateMany(
-    { _id: { $in: remove || [] }},
-    { $pull: { courseIds: req.params.id } }
-  )
-
-  res.status(200).send()
-})
-
-function replaceObjectIdWithString(object) {
-  object._id = object._id.toString()
-  return object 
-}
-
-function convertUnderscoreIdToId(object) {
-  object.id = object._id
-  delete object._id
-  return object
-}
-
-router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  const students = await getMongoCollection('users') // TODO: Make new ObjectId(req.params.id). 
-    .find({ courseIds: req.params.id }, { password: 0, role: 0, courseIds: 0 }).toArray()
+  const submissions = await getMongoCollection('submissions').find(options)
     .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
-    .map(result => [result.id, result.name, result.email]).toArray()
+    .skip(skipNumber).limit(resultsPerPage).toArray()
 
-  res.set('Content-Type', 'text/csv')
-  res.status(200).send(json2csv(students))
-})
-
-router.get('/courses/:id/assignments', checkCourseExists, async (req, res) => {
-  // TODO: Spec doesn't say requires authorization. It may be a good idea to have authorization here? 
-  await getMongoCollection('assignments')
-    .find({ courseId: req.params.id }, { courseId: 0, title: 0, points: 0, due: 0 })
-    .map(result => result._id).toArray()
+  res.status(200).send(submissions)
 })
 
 module.exports = router
