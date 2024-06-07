@@ -3,8 +3,9 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getCourseInfoById, getCourseList, addCourse } = require('../models/course')
+const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
 const { isUserAdmin } = require('../lib/jsonwebtoken')
+const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 
 // TODO: GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
 
@@ -21,10 +22,18 @@ router.get('/', async (req, res) => {
 
 router.post('/', async(req, res) => {
   // TODO: Replace req.token with authorization header? 
-  if (await isUserAdmin(req.token)) {
-    const id = await addCourse(req.body)
-    res.status(201).send({ id })
+  if (!(await isUserAdmin(req.token))) {
+    res.status(403)
   }
+
+  if (!hasRequiredSchemaAttributes(req.body, CourseSchema)) {
+    res.status(400)
+  }
+
+  course = extractSchemaAttributes(req.body, CourseSchema)
+
+  const id = await addCourse(course)
+  res.status(201).send({ id })
 })
 
 router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
