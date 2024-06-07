@@ -7,13 +7,9 @@ const router = Router()
 const { getCourseInfoById, isCourseIdInUserCourseIds } = require('../models/course')
 const { getAssignmentInfoById, AssignmentSchema, SubmissionSchema } = require('../models/assignment')
 const { isUserExistsById } = require('../models/user')
-const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn, getJwtTokenDecoded } = require('../lib/jsonwebtoken')
-const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
+const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
+const { extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
-
-const { json2csv } = require('json-2-csv')
-
-// TODO: GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
 
 const resultsPerPage = 10
 

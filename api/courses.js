@@ -4,7 +4,7 @@ const { Router } = require('express')
 const router = Router()
 
 const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
-const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
+const { isUserAdmin, isUserInstructor } = require('../lib/jsonwebtoken')
 const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
