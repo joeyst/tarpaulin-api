@@ -5,7 +5,7 @@ const router = Router()
 
 const { checkRequestIdMatchesTokenId, addUserInfoToRequest } = require('../lib/jsonwebtoken')
 const { getUserInfoById, getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
-const { getJwtTokenDecoded } = require('../lib/jsonwebtoken')
+const { getJwtTokenDecoded, isUserAdmin } = require('../lib/jsonwebtoken')
 
 async function checkUserExists(req, res, next) {
   if (!!(await getUserInfoById(req.params.id))) {
@@ -64,18 +64,15 @@ router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res)
 router.post('/', checkUserCreateFieldsExist, async (req, res) => {
   const { name, email, password, role } = req.body
   // TODO: Add check for if email exists already. 
-  if ((role == "instructor") || (role == "admin")) {
-    const loggedInUserInfo = getJwtTokenDecoded(req.token)
-    if (!loggedInUserInfo) {
-      res.status(403).send()
-    }
-    const { loggedInUserRole } = await getUserInfoByEmail(loggedInUserInfo.email)
-    if (loggedInUserRole !== "admin") {
+  if (role == "instructor" || role == "admin") {
+    if (!isUserAdmin(req.token)) {
       res.status(403).send()
     }
     const id = await addUser({ name, email, password, role })
     res.status(201).send({ id })
   }
+  // TODO: Add if role is "student". 
+  // TODO: Add send status code 400(?) if role isn't "student", "instructor", or "admin"? Could be status code 403. 
 })
 
 module.exports = router
