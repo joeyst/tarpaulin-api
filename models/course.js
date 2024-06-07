@@ -24,9 +24,15 @@ async function addCourse(courseObject): Promise<string> {
     .then(result => result.insertedId.toString())
 }
 
+async function partialUpdateCourse(id, courseObject) {
+  return await getMongoCollection('courses')
+    .updateOne({ _id: id}, { $set: courseObject }) 
+}
+
 module.exports = {
   CourseSchema,
   getCourseInfoById,
   getCourseList,
-  addCourse
+  addCourse, 
+  partialUpdateCourse
 }
