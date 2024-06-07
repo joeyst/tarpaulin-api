@@ -4,10 +4,10 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
-const { getAssignmentInfoById, AssignmentSchema } = require('../models/assignment')
+const { getCourseInfoById, isCourseIdInUserCourseIds } = require('../models/course')
+const { getAssignmentInfoById, AssignmentSchema, SubmissionSchema } = require('../models/assignment')
 const { isUserExistsById } = require('../models/user')
-const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
+const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn, getJwtTokenDecoded } = require('../lib/jsonwebtoken')
 const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
@@ -126,6 +126,26 @@ router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstruct
     .skip(skipNumber).limit(resultsPerPage).toArray()
 
   res.status(200).send(submissions)
+})
+
+router.post('/:id/submissions', checkAssignmentExists, async (req, res) => {
+  if (!isUserLoggedIn(req.token) || !isUserStudent(req.token)) {
+    res.status(403).send()
+  }
+
+  const { id: userId } = getDecodedJwtInfo(req.token)
+
+  const assignmentId = req.params.id 
+  const { courseId } = getAssignmentInfoById(assignmentId)
+
+  if (!(await isCourseIdInUserCourseIds(courseId, userId))) {
+    res.status(403).send()
+  }
+
+  const submission = extractSchemaAttributes(req.body, SubmissionSchema)
+
+  const id = await getMongoCollection('submission').insertOne(submission)
+  res.status(201).send({ id })
 })
 
 module.exports = router

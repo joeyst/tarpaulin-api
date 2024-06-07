@@ -29,10 +29,21 @@ async function partialUpdateCourse(id, courseObject) {
     .updateOne({ _id: id}, { $set: courseObject }) 
 }
 
+async function isCourseIdInUserCourseIds(courseId, userId): Promise<bool> {
+  const courseIds = await getMongoCollection('users').findOne({ _id: userId })
+  return (courseIds || []).includes(courseId)
+}
+
+async function isCourseExists(courseId): Promise<bool> {
+  return !!(await getCourseInfoById(courseId))
+}
+
 module.exports = {
   CourseSchema,
   getCourseInfoById,
   getCourseList,
   addCourse, 
-  partialUpdateCourse
+  partialUpdateCourse,
+  isCourseIdInUserCourseIds, 
+  isCourseExists 
 }

@@ -13,7 +13,16 @@ async function getAssignmentInfoById(id) {
   return await getMongoCollection('assignments').findOne({ _id: new ObjectId(id) })
 }
 
+const SubmissionSchema = {
+  assignmentId: { require: true },
+  studentId: { require: true },
+  timestamp: { require: true },
+  grade: { require: true }
+  file: { require: true }
+}
+
 module.exports = {
   AssignmentSchema,
-  getAssignmentInfoById
+  getAssignmentInfoById,
+  SubmissionSchema
 }
