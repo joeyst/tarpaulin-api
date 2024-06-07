@@ -11,6 +11,13 @@ const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib
 
 const resultsPerPage = 10
 
+async function checkCourseExists(req, res, next) {
+  if (!(await getCourseInfoById(req.params.id))) {
+    res.status(404).send()
+  }
+  next()
+}
+
 router.get('/', async (req, res) => {
   /* page query parameter is 1-indexed, by OpenAPI specifications. */
   // TODO: Spec doesn't mention if invalid query. Should send error response? 
@@ -34,6 +41,10 @@ router.post('/', async(req, res) => {
 
   const id = await addCourse(course)
   res.status(201).send({ id })
+})
+
+router.get('/:id', checkCourseExists, async (req, res) => {
+  res.status(200).send(getCourseInfoById(req.params.id))
 })
 
 router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
