@@ -8,6 +8,8 @@ const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require
 const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
+const { json2csv } = require('json-2-csv')
+
 // TODO: GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
 
 const resultsPerPage = 10
@@ -124,6 +126,34 @@ router.post('/:id/students', checkCourseExists, async (req, res) => {
   )
 
   res.status(200).send()
+})
+
+function replaceObjectIdWithString(object) {
+  object._id = object._id.toString()
+  return object 
+}
+
+function convertUnderscoreIdToId(object) {
+  object.id = object._id
+  delete object._id
+  return object
+}
+
+router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
+  const courseInfo = await getCourseInfoById(req.params.id)
+  if (!(
+    await isUserAdmin(req.token) ||
+    await isUserInstructor(req.token) === courseInfo.instructorId
+  )) {
+    res.status(403).send()
+  }
+
+  const students = await getMongoCollection('users')
+    .find({ courseIds: req.params.id }, { password: 0, role: 0, courseIds: 0 }).toArray()
+    .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
+    .map(result => [result.id, result.name, result.email]).toArray()
+
+  res.status(200).send(json2csv(students))
 })
 
 module.exports = router
