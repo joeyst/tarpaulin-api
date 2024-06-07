@@ -77,6 +77,9 @@ router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => 
 })
 
 router.delete('/:id', checkCourseExists, checkUserIsAdmin, async (req, res) => {
+  // TODO: Add deletion. 
+  // TODO: Add delete assignments in course. 
+  // TODO: Add delete courseId from user courseIds attribute. 
   res.status(204).send()
 })
 
