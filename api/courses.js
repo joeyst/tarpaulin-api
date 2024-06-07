@@ -94,44 +94,4 @@ router.get('/:id/students', checkCourseExists, async (req, res) => {
   res.status(200).send(studentIds)
 })
 
-router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
-  /*
-  Fetches data about a specific User. 
-  case User role:
-    "student"    => list of courses student is enrolled in | Gets User courseIds attribute 
-    "instructor" => list of courses instructor teaches     | Filters Courses by User instructorId 
-  */
-  if (req.user.role === "instructor") {
-    const courseCollection = getMongoCollection("courses")
-    res.status(200).send(await courseCollection.find({instructorId: "instructor"}))
-  } else {
-    const userCollection = getMongoCollection("users")
-    res.status(200).send(await userCollection.find({_id: req.user.id}).then(user => user.courseIds))
-  }
-})
-
-router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res) => {
-  // TODO: Add check that User with email exists with 401 status response.
-  /* Sends {token: ...}. */
-  const { name, email, _id: id } = getUserInfoByEmail(req.user.email)
-  res.status(200).send({token: getJwtTokenFromUser({ name, email, id })})
-})
-
-router.post('/', checkUserCreateFieldsExist, async (req, res) => {
-  const { name, email, password, role } = req.body
-  // TODO: Add check for if email exists already. 
-  if ((role == "instructor") || (role == "admin")) {
-    const loggedInUserInfo = getJwtTokenDecoded(req.token)
-    if (!loggedInUserInfo) {
-      res.status(403).send()
-    }
-    const { loggedInUserRole } = await getUserInfoByEmail(loggedInUserInfo.email)
-    if (loggedInUserRole !== "admin") {
-      res.status(403).send()
-    }
-    const id = await addUser({ name, email, password, role })
-    res.status(201).send({ id })
-  }
-})
-
 module.exports = router
