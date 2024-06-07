@@ -60,6 +60,7 @@ router.get('/:id', checkCourseExists, async (req, res) => {
 })
 
 router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => {
+  // TODO: Move req.course checking to after checking is admin or instructor of course. 
   if (!req.course || Object.keys(req.course).length === 0) {
     res.status(400).send()
   }

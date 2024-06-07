@@ -35,6 +35,11 @@ async function checkUserIsAdminOrInstructorOfCourse(req, res, next) {
   next()
 }
 
+async function appendAssignmentToBody(req, _, next) {
+ req.assignment = extractSchemaAttributes(req.body, AssignmentSchema)
+ next()
+}
+
 router.post('/', async (req, res) => {
   if (!hasSchemaRequiredAttributes(req.body, AssignmentSchema)) {
     res.status(400).send()
@@ -61,9 +66,23 @@ router.post('/', async (req, res) => {
   res.status(201).send({ id })
 })
 
-router.get('/assignments/:id', checkAssignmentExists, async (req, res) => {
+router.get('/:id', checkAssignmentExists, async (req, res) => {
   const assignment = getAssignmentInfoById(req.params.id)
   res.status(200).send(assignment)
+})
+
+router.patch('/:id', checkAssignmentExists, appendAssignmentToBody, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
+ if (!req.assignment || Object.keys(req.assignment).length === 0) {
+    res.status(400).send()
+  }
+
+  await getMongoCollection('assignments').updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.course })
+  res.status(200).send()
+})
+
+router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
+  await getMongoCollection('assignments').delete({ _id: new ObjectId(req.params.id) })
+  res.status(204).send()
 })
 
 async function checkUserIsAdmin(req, res, next) {
@@ -193,7 +212,7 @@ router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
     res.status(403).send()
   }
 
-  const students = await getMongoCollection('users')
+  const students = await getMongoCollection('users') // TODO: Make new ObjectId(req.params.id). 
     .find({ courseIds: req.params.id }, { password: 0, role: 0, courseIds: 0 }).toArray()
     .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
     .map(result => [result.id, result.name, result.email]).toArray()
