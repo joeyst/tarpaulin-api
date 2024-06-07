@@ -5,6 +5,7 @@ const { Router } = require('express')
 const router = Router()
 
 const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
+const { getAssignmentInfoById, AssignmentSchema } = require('../models/assignment')
 const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
 const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
@@ -15,15 +16,16 @@ const { json2csv } = require('json-2-csv')
 
 const resultsPerPage = 10
 
-async function checkCourseExists(req, res, next) {
-  if (!(await getCourseInfoById(req.params.id))) {
+async function checkAssignmentExists(req, res, next) {
+  if (!(await getAssignmentInfoById(req.params.id))) {
     res.status(404).send()
   }
   next()
 }
 
 async function checkUserIsAdminOrInstructorOfCourse(req, res, next) {
-  const courseInfo = await getCourseInfoById(req.params.id)
+  const { courseId } = await getAssignmentInfoById(req.params.id)
+  const courseInfo = await getCourseInfoById(courseId)
   if (!(
     await isUserAdmin(req.token) ||
     await isUserInstructor(req.token) === courseInfo.instructorId
@@ -45,7 +47,7 @@ router.post('/', async (req, res) => {
   }
 
   if (!(
-    await isUserAdmin(req.token) ||
+    await isUserAdmin(req.token) || // TODO: Make (isUserInstructor(req.token) && userId === courseInfo.instructorId)
     await isUserInstructor(req.token) === courseInfo.instructorId
   )) {
     res.status(403).send()
@@ -57,6 +59,11 @@ router.post('/', async (req, res) => {
     .then(result => result.insertedId.toString())
 
   res.status(201).send({ id })
+})
+
+router.get('/assignments/:id', checkAssignmentExists, async (req, res) => {
+  const assignment = getAssignmentInfoById(req.params.id)
+  res.status(200).send(assignment)
 })
 
 async function checkUserIsAdmin(req, res, next) {
