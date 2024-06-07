@@ -153,6 +153,7 @@ router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
     .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
     .map(result => [result.id, result.name, result.email]).toArray()
 
+  res.set('Content-Type', 'text/csv')
   res.status(200).send(json2csv(students))
 })
 
