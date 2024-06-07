@@ -156,4 +156,11 @@ router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
   res.status(200).send(json2csv(students))
 })
 
+router.get('/courses/:id/assignments', checkCourseExists, async (req, res) => {
+  // TODO: Spec doesn't say requires authorization. It may be a good idea to have authorization here? 
+  await getMongoCollection('assignments')
+    .find({ courseId: req.params.id }, { courseId: 0, title: 0, points: 0, due: 0 })
+    .map(result => result._id).toArray()
+})
+
 module.exports = router
