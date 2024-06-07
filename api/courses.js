@@ -3,9 +3,10 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getCourseInfoById, getCourseList } = require('../models/course')
+const { getCourseInfoById, getCourseList, addCourse } = require('../models/course')
+const { isUserAdmin } = require('../lib/jsonwebtoken')
 
-// TODO: POST /courses, GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
+// TODO: GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
 
 const resultsPerPage = 10
 
@@ -16,6 +17,14 @@ router.get('/', async (req, res) => {
   delete req.query.page
   const courseList = await getCourseList(req.query, { skip: skipNumber }, resultsPerPage)
   res.status(200).send(courseList)
+})
+
+router.post('/', async(req, res) => {
+  // TODO: Replace req.token with authorization header? 
+  if (await isUserAdmin(req.token)) {
+    const id = await addCourse(req.body)
+    res.status(201).send({ id })
+  }
 })
 
 router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {

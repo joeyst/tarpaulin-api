@@ -18,8 +18,15 @@ async function getCourseList(query, options, limit) {
   return await getMongoCollection('courses').find(query, options).limit(limit).toArray()
 }
 
+async function addCourse(courseObject): Promise<string> {
+  return await getMongoCollection('courses')
+    .insertOne(courseObject)
+    .then(result => result.insertedId.toString())
+}
+
 module.exports = {
   CourseSchema,
   getCourseInfoById,
-  getCourseList
+  getCourseList,
+  addCourse
 }

@@ -24,7 +24,7 @@ function checkLoginFieldsExist(req, res, next) {
 }
 
 function checkUserPassword(req, res, next) {
-  if (!isUserPasswordCorrect(req.user.password, req.user.id)) {
+  if (!(await isUserPasswordCorrect(req.user.password, req.user.id))) {
     res.status(401).send()
   }
   next()
