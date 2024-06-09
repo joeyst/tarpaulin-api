@@ -64,6 +64,15 @@ router.get(
   sendStatusCodeWithAttribute(200, 'course')
 )
 
+router.patch(
+  '/:id',
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  checkAndAppendSchemaAttributes('body', 'course', CourseSchema, checkHasRequired=false),
+  updateModelsByFilter('courses', { _id: 'params.id' }, 'course'),
+  sendStatusCodeWithAttribute(200)
+)
+
 router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => {
   // TODO: Move req.course checking to after checking is admin or instructor of course. 
   if (!req.course || Object.keys(req.course).length === 0) {
