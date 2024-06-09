@@ -75,6 +75,16 @@ router.patch(
   sendStatusCodeWithAttribute(200)
 )
 
+router.delete(
+  '/:id',
+  findAndAppendModelInfoByFilter('assignments', { _id: 'params.id' }, 'assignment'),
+  findAndAppendModelInfoByFilter('courses', { _id: 'assignment.courseId' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'assignment', 'instructorId']),
+  deleteModelsByFilter('assignments', { _id: 'params.id' }),
+  deleteModelsByFilter('submissions', { assignmentId: 'params.id' }),
+  sendStatusCodeWithAttribute(204)
+)
+
 router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   await getMongoCollection('assignments').delete({ _id: new ObjectId(req.params.id) })
   res.status(204).send()
