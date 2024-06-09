@@ -62,6 +62,12 @@ router.get('/:id', checkCourseExists, async (req, res) => {
   res.status(200).send(getCourseInfoById(req.params.id))
 })
 
+router.get(
+  '/:id',
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  sendStatusCodeWithAttribute(200, 'course')
+)
+
 router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => {
   // TODO: Move req.course checking to after checking is admin or instructor of course. 
   if (!req.course || Object.keys(req.course).length === 0) {
