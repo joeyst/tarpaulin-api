@@ -115,6 +115,17 @@ router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstruct
   res.status(200).send(submissions)
 })
 
+router.post(
+  '/:id/submissions', 
+  checkAndAppendSchemaAttributes('body', 'submission', SubmissionSchema),
+  findAndAppendModelInfoByFilter('assignments', { _id: 'params.id' }, 'assignment'),
+  // TODO: Remove log-in requirement from appendJwtLoginInfo. 
+  checkIsAuthenticated('student'),
+  findAndAppendModelInfoByFilter('users', { _id: 'login.id', courseIds: 'assignment.courseId' }, 'user'),
+  insertModelAndAppendId('submissions', 'submission'),
+  sendStatusCodeWithAttribute(201, 'id', 'id')
+)
+
 router.post('/:id/submissions', checkAssignmentExists, async (req, res) => {
   if (!isUserLoggedIn(req.token) || !isUserStudent(req.token)) {
     res.status(403).send()
