@@ -96,37 +96,6 @@ router.get(
   sendStatusCodeWithAttribute(200, 'submissions')
 )
 
-router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
-  const assignmentId        = req.params.id
-  var { studentId, page } = req.query
-
-  if (page !== null && isNan(parseInt(page))) {
-    res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
-    return
-  }
-
-  page ||= 1
-  const skipNumber = resultsPerPage * (parseInt(page) - 1) 
-
-  const options = { assignmentId }
-  if (
-    studentId !== null && 
-    (!ObjectId.isValid(studentId) || await isUserExistsById(studentId))
-  ) {
-    res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
-  }
-
-  if (studentId !== null) {
-    options.studentId = studentId
-  }
-
-  const submissions = await getMongoCollection('submissions').find(options)
-    .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
-    .skip(skipNumber).limit(resultsPerPage).toArray()
-
-  res.status(200).send(submissions)
-})
-
 router.post(
   '/:id/submissions', 
   checkAndAppendSchemaAttributes('body', 'submission', SubmissionSchema),
