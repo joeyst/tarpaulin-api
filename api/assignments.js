@@ -99,6 +99,7 @@ router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstruct
 
   if (page !== null && isNan(parseInt(page))) {
     res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
+    return
   }
 
   page ||= 1
