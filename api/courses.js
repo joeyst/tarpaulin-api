@@ -73,24 +73,6 @@ router.patch(
   sendStatusCodeWithAttribute(200)
 )
 
-router.patch('/:id', checkCourseExists, appendCourseToBody, async (req, res) => {
-  // TODO: Move req.course checking to after checking is admin or instructor of course. 
-  if (!req.course || Object.keys(req.course).length === 0) {
-    res.status(400).send()
-  }
-
-  const courseInfo = await getCourseInfoById(id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  await partialUpdateCourse(id, req.course)
-  res.status(200).send()
-})
-
 router.delete('/:id', checkCourseExists, checkUserIsAdmin, async (req, res) => {
   // TODO: Add deletion. 
   // TODO: Add delete assignments in course. 
