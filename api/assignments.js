@@ -75,15 +75,6 @@ router.patch(
   sendStatusCodeWithAttribute(200)
 )
 
-router.patch('/:id', checkAssignmentExists, appendAssignmentToBody, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
- if (!req.assignment || Object.keys(req.assignment).length === 0) {
-    res.status(400).send()
-  }
-
-  await getMongoCollection('assignments').updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.course })
-  res.status(200).send()
-})
-
 router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   await getMongoCollection('assignments').delete({ _id: new ObjectId(req.params.id) })
   res.status(204).send()
