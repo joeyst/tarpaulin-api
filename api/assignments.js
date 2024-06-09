@@ -55,7 +55,7 @@ router.post(
   checkAndAppendSchemaAttributes('body', 'assignment', AssignmentSchema), 
   findAndAppendModelInfoByFilter('courses', { _id: 'body.courseId' }, 'course'),
   checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
-  insertModelAndAppendId('assignment', 'assignment'),
+  insertModelAndAppendId('assignments', 'assignment'),
   sendStatusCodeWithAttribute(201, 'id', 'id')
 )
 

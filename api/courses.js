@@ -55,6 +55,14 @@ router.post('/', checkUserIsAdmin, checkRequestBodyAgainstCourseSchema, appendCo
   res.status(201).send({ id })
 })
 
+router.post(
+  '/', 
+  checkIsAuthenticated(['admin']),
+  checkAndAppendSchemaAttributes('body', 'course', CourseSchema), 
+  insertModelAndAppendId('courses', 'course'),
+  sendStatusCodeWithAttribute(201, 'id', 'id')
+)
+
 router.get('/:id', checkCourseExists, async (req, res) => {
   res.status(200).send(getCourseInfoById(req.params.id))
 })
