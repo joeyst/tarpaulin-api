@@ -85,11 +85,6 @@ router.delete(
   sendStatusCodeWithAttribute(204)
 )
 
-router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
-  await getMongoCollection('assignments').delete({ _id: new ObjectId(req.params.id) })
-  res.status(204).send()
-})
-
 router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   const assignmentId        = req.params.id
   var { studentId, page } = req.query
