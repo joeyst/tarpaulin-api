@@ -126,24 +126,4 @@ router.post(
   sendStatusCodeWithAttribute(201, 'id', 'id')
 )
 
-router.post('/:id/submissions', checkAssignmentExists, async (req, res) => {
-  if (!isUserLoggedIn(req.token) || !isUserStudent(req.token)) {
-    res.status(403).send()
-  }
-
-  const { id: userId } = getDecodedJwtInfo(req.token)
-
-  const assignmentId = req.params.id 
-  const { courseId } = getAssignmentInfoById(assignmentId)
-
-  if (!(await isCourseIdInUserCourseIds(courseId, userId))) {
-    res.status(403).send()
-  }
-
-  const submission = extractSchemaAttributes(req.body, SubmissionSchema)
-
-  const id = await getMongoCollection('submission').insertOne(submission)
-  res.status(201).send({ id })
-})
-
 module.exports = router
