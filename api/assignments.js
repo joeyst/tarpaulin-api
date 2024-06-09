@@ -11,7 +11,7 @@ const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require
 const { extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
-const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition } = require('../lib/append')
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction, appendByVariable } = require('../lib/append')
 
 const resultsPerPage = 10
 
@@ -87,8 +87,13 @@ router.delete(
 
 router.get(
   '/:id/submissions', 
-  checkIsCondition(x => !isNan(parseInt(x)), 'query.page', 400)
-
+  checkIsCondition(x => !isNan(parseInt(x)), 'query.page', 400),
+  appendByFunction(page => resultsPerPage * (parseInt(page) - 1), 'skipNumber', 'query.page'),
+  appendByFunction(() => resultsPerPage, 'resultsPerPage'), 
+  appendByFunction((assignmentId, studentId) => { assignmentId, studentId }, 'options', 'params.id', 'query.studentId'),
+  appendByFunction(obj => omitBy(obj, isNull)),
+  findAndAppendModelsInfoByFilter('submissions', 'options', 'submissions', skipAttr='skipNumber', limitAttr='resultsPerPage'),
+  sendStatusCodeWithAttribute(200, 'submissions')
 )
 
 //  checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
