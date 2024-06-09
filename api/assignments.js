@@ -53,7 +53,7 @@ function convertUnderscoreIdToId(object) {
 router.post(
   '/', 
   checkAndAppendSchemaAttributes('body', 'assignment', AssignmentSchema), 
-  findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
+  findAndAppendModelInfoByFilter('courses', { _id: 'body.courseId' }, 'course'),
   checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
   insertModelAndAppendId('assignment', 'assignment'),
   sendStatusCodeWithAttribute(201, 'id', 'id')
@@ -61,13 +61,13 @@ router.post(
 
 router.get(
   '/:id', 
-  findAndAppendModelInfoByFilter('assignments', { _id: 'id' }, 'params', 'assignment'),
+  findAndAppendModelInfoByFilter('assignments', { _id: 'params.id'}, 'assignment'),
   sendStatusCodeWithAttribute(200, 'assignment')
 )
 
 router.patch(
   '/:id', 
-  findAndAppendModelInfoByFilter('assignments', { _id: 'id' }, 'params', 'assignment', )
+  findAndAppendModelInfoByFilter('assignments', { _id: 'params.id' }, 'assignment'),
   sendStatusCodeWithAttributes(200)
 )
 
