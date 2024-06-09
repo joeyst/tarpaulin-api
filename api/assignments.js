@@ -11,6 +11,8 @@ const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require
 const { extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated } = require('../lib/append')
+
 const resultsPerPage = 10
 
 async function checkAssignmentExists(req, res, next) {
@@ -48,31 +50,19 @@ function convertUnderscoreIdToId(object) {
   return object
 }
 
-router.post('/', async (req, res) => {
-  if (!hasSchemaRequiredAttributes(req.body, AssignmentSchema)) {
-    res.status(400).send()
+router.post(
+  '/', 
+  checkAndAppendSchemaAttributes('body', 'assignment', AssignmentSchema), 
+  findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  async (req, res) => {
+    const id = await getMongoCollection('assignments')
+      .insertOne(req.assignment)
+      .then(result => result.insertedId.toString())
+
+    res.status(201).send({ id })
   }
-
-  courseInfo = await getCourseInfoById(req.body.courseId)
-
-  if (!courseInfo) {
-    res.status(400).send()
-  }
-
-  if (!(
-    await isUserAdmin(req.token) || // TODO: Make (isUserInstructor(req.token) && userId === courseInfo.instructorId)
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  const assignmentObject = extractSchemaAttributes(req.body)
-  const id = await getMongoCollection('assignments')
-    .insertOne(assignmentObject)
-    .then(result => result.insertedId.toString())
-
-  res.status(201).send({ id })
-})
+)
 
 router.get('/:id', checkAssignmentExists, async (req, res) => {
   // TODO: Is this correct "summary data" (segun le specs). 
