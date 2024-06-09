@@ -56,14 +56,14 @@ router.post(
   findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
   checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
   insertModelAndAppendId('assignment', 'assignment'),
-  sendStatusCodeWithAttribute(201, 'id')
+  sendStatusCodeWithAttribute(201, 'id', 'id')
 )
 
-router.get('/:id', checkAssignmentExists, async (req, res) => {
-  // TODO: Is this correct "summary data" (segun le specs). 
-  const assignment = getAssignmentInfoById(req.params.id)
-  res.status(200).send(assignment)
-})
+router.get(
+  '/:id', 
+  findAndAppendModelInfoByFilter('assignments', { _id: 'id' }, 'params', 'assignment'),
+  sendStatusCodeWithAttribute(200, 'assignment')
+)
 
 router.patch('/:id', checkAssignmentExists, appendAssignmentToBody, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
  if (!req.assignment || Object.keys(req.assignment).length === 0) {
