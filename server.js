@@ -1,4 +1,5 @@
 const express = require('express')
+const rateLimiter = require('./lib/rateLimiter')
 const morgan = require('morgan')
 
 const api = require('./api')
@@ -7,6 +8,7 @@ const { connectToDb } = require('./lib/mongo')
 const app = express()
 const port = process.env.PORT || 8000
 
+app.use(rateLimiter)
 app.use(morgan('dev')) // Logging 
 app.use(express.json()) // Parsing requests to JSON 
 app.use(express.static('public')) // Serving files in public directory 
