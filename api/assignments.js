@@ -65,6 +65,12 @@ router.get(
   sendStatusCodeWithAttribute(200, 'assignment')
 )
 
+router.patch(
+  '/:id', 
+  findAndAppendModelInfoByFilter('assignments', { _id: 'id' }, 'params', 'assignment', )
+  sendStatusCodeWithAttributes(200)
+)
+
 router.patch('/:id', checkAssignmentExists, appendAssignmentToBody, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
  if (!req.assignment || Object.keys(req.assignment).length === 0) {
     res.status(400).send()
