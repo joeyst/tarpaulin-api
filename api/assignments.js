@@ -87,16 +87,14 @@ router.delete(
 
 router.get(
   '/:id/submissions', 
-  checkIsCondition(x => !isNan(parseInt(x)), 'query.page', 400),
-  appendByFunction(page => resultsPerPage * (parseInt(page) - 1), 'skipNumber', 'query.page'),
+  checkIsCondition(page => !(typeof page === "string") || !isNan(parseInt(page)), 'query.page', 400),
+  appendByFunction(page => resultsPerPage * ((parseInt(page) || 1) - 1), 'skipNumber', 'query.page'),
   appendByFunction(() => resultsPerPage, 'resultsPerPage'), 
   appendByFunction((assignmentId, studentId) => { assignmentId, studentId }, 'options', 'params.id', 'query.studentId'),
   appendByFunction(obj => omitBy(obj, isNull)),
   findAndAppendModelsInfoByFilter('submissions', 'options', 'submissions', skipAttr='skipNumber', limitAttr='resultsPerPage'),
   sendStatusCodeWithAttribute(200, 'submissions')
 )
-
-//  checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
 
 router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   const assignmentId        = req.params.id
