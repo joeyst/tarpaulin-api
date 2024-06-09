@@ -50,11 +50,6 @@ router.get('/', async (req, res) => {
   res.status(200).send(courseList)
 })
 
-router.post('/', checkUserIsAdmin, checkRequestBodyAgainstCourseSchema, appendCourseToBody, async(req, res) => {
-  const id = await addCourse(req.course)
-  res.status(201).send({ id })
-})
-
 router.post(
   '/', 
   checkIsAuthenticated(['admin']),
