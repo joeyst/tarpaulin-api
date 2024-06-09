@@ -58,10 +58,6 @@ router.post(
   sendStatusCodeWithAttribute(201, 'id', 'id')
 )
 
-router.get('/:id', checkCourseExists, async (req, res) => {
-  res.status(200).send(getCourseInfoById(req.params.id))
-})
-
 router.get(
   '/:id',
   findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
