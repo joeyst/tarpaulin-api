@@ -96,7 +96,7 @@ router.delete('/:id', checkAssignmentExists, checkUserIsAdminOrInstructorOfCours
 
 router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   const assignmentId        = req.params.id
-  var { studentId, page } = req.query.studentId 
+  var { studentId, page } = req.query
 
   if (page !== null && isNan(parseInt(page))) {
     res.status(400).send() // TODO: Spec doesn't say to do res.status(400) here but it only really makes sense. 
