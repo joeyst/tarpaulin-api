@@ -11,7 +11,7 @@ const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require
 const { extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
-const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute } = require('../lib/append')
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition } = require('../lib/append')
 
 const resultsPerPage = 10
 
@@ -84,6 +84,14 @@ router.delete(
   deleteModelsByFilter('submissions', { assignmentId: 'params.id' }),
   sendStatusCodeWithAttribute(204)
 )
+
+router.get(
+  '/:id/submissions', 
+  checkIsCondition(x => !isNan(parseInt(x)), 'query.page', 400)
+
+)
+
+//  checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
 
 router.get('/:id/submissions', checkAssignmentExists, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
   const assignmentId        = req.params.id
