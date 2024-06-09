@@ -54,12 +54,11 @@ router.post(
   '/', 
   checkAndAppendSchemaAttributes('body', 'assignment', AssignmentSchema), 
   findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
-  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId'])
   async (req, res) => {
     const id = await getMongoCollection('assignments')
       .insertOne(req.assignment)
       .then(result => result.insertedId.toString())
-
     res.status(201).send({ id })
   }
 )
