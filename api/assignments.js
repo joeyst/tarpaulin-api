@@ -56,10 +56,7 @@ router.post(
   findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
   checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
   insertModelAndAppendId('assignment', 'assignment'),
-  sendStatusCodeWithAttribute(201, )
-  async (req, res) => {
-    res.status(201).send({ id: req.id })
-  }
+  sendStatusCodeWithAttribute(201, 'id')
 )
 
 router.get('/:id', checkAssignmentExists, async (req, res) => {
