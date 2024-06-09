@@ -68,7 +68,11 @@ router.get(
 router.patch(
   '/:id', 
   findAndAppendModelInfoByFilter('assignments', { _id: 'params.id' }, 'assignment'),
-  sendStatusCodeWithAttributes(200)
+  findAndAppendModelInfoByFilter('courses', { _id: 'assignment.courseId' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'assignment', 'instructorId']),
+  checkAndAppendSchemaAttributes('body', 'assignment', AssignmentSchema, checkHasRequired=false),
+  updateModelsByFilter('assignments', { _id: 'params.id' }, 'assignment'),
+  sendStatusCodeWithAttribute(200)
 )
 
 router.patch('/:id', checkAssignmentExists, appendAssignmentToBody, checkUserIsAdminOrInstructorOfCourse, async (req, res) => {
