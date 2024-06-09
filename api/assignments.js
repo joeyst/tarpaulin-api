@@ -11,7 +11,7 @@ const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require
 const { extractSchemaAttributes } = require('../lib/schemaValidation')
 const { getMongoCollection } = require('../lib/mongo')
 
-const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated } = require('../lib/append')
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute } = require('../lib/append')
 
 const resultsPerPage = 10
 
@@ -56,6 +56,7 @@ router.post(
   findAndAppendModelInfoByFilter('courses', { _id: 'courseId' }, 'body', 'course'),
   checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
   insertModelAndAppendId('assignment', 'assignment'),
+  sendStatusCodeWithAttribute(201, )
   async (req, res) => {
     res.status(201).send({ id: req.id })
   }
