@@ -20,19 +20,19 @@ async function getUserInfoByEmail(email) {
   return await getMongoCollection('users').findOne({ email })
 }
 
-async function addUser(userObject): Promise<string> {
+async function addUser(userObject) {
   userObject.password = getPasswordHashed(userObject.password)
   return await getMongoCollection('users')
     .insertOne(userObject)
     .then(result => result.insertedId.toString())
 }
 
-async function isUserPasswordCorrect(password, id): Promise<boolean> {
+async function isUserPasswordCorrect(password, id) {
   const { password: storedPassword } = await getUserInfoById(id)
   return comparePassword(password, storedPassword)
 }
 
-async function isUserExistsById(id): Promise<boolean> {
+async function isUserExistsById(id) {
   return !!(await getUserInfoById(id))
 }
 

@@ -18,7 +18,7 @@ async function getCourseList(query, options, limit) {
   return await getMongoCollection('courses').find(query, options).limit(limit).toArray()
 }
 
-async function addCourse(courseObject): Promise<string> {
+async function addCourse(courseObject) {
   return await getMongoCollection('courses')
     .insertOne(courseObject)
     .then(result => result.insertedId.toString())
@@ -29,12 +29,12 @@ async function partialUpdateCourse(id, courseObject) {
     .updateOne({ _id: id}, { $set: courseObject }) 
 }
 
-async function isCourseIdInUserCourseIds(courseId, userId): Promise<bool> {
+async function isCourseIdInUserCourseIds(courseId, userId) {
   const courseIds = await getMongoCollection('users').findOne({ _id: userId })
   return (courseIds || []).includes(courseId)
 }
 
-async function isCourseExists(courseId): Promise<bool> {
+async function isCourseExists(courseId) {
   return !!(await getCourseInfoById(courseId))
 }
 
