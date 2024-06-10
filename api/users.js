@@ -43,17 +43,23 @@ router.post(
 })
 
 router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), async (req, res) => {
-  const { name, email, password, role } = req.body
-  // TODO: Add check for if email exists already. 
-  if (role == "instructor" || role == "admin") {
-    if (!isUserAdmin(req.token)) {
-      res.status(403).send()
-    }
-    const id = await addUser({ name, email, password, role })
-    res.status(201).send({ id })
+  if (!["admin", "instructor", "user"].includes(req.user.role)) {
+    res.status(400).send()
+    return
   }
-  // TODO: Add if role is "student". 
-  // TODO: Add send status code 400(?) if role isn't "student", "instructor", or "admin"? Could be status code 403. 
+  else if (
+    (role == "instructor" || role == "admin") &&
+    req.login.role !== "admin"
+   ) {
+    res.status(403).send()
+    return
+  }
+  const usersCollection = getMongoCollection('users')
+  if (await usersCollection.findOne({ email: req.user.email })) {
+    res.status(400).send()
+  }
+  const id = await usersCollection.insertOne(req.user)
+  res.status(201).send({ id })
 })
 
 module.exports = router
