@@ -60,22 +60,6 @@ router.get(
   }
 )
 
-router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
-  /*
-  Fetches data about a specific User. 
-  case User role:
-    "student"    => list of courses student is enrolled in | Gets User courseIds attribute 
-    "instructor" => list of courses instructor teaches     | Filters Courses by User instructorId 
-  */
-  if (req.user.role === "instructor") {
-    const courseCollection = getMongoCollection("courses")
-    res.status(200).send(await courseCollection.find({instructorId: "instructor"}))
-  } else {
-    const userCollection = getMongoCollection("users")
-    res.status(200).send(await userCollection.find({_id: req.user.id}).then(user => user.courseIds))
-  }
-})
-
 router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res) => {
   // TODO: Add check that User with email exists with 401 status response.
   /* Sends {token: ...}. */
