@@ -120,38 +120,6 @@ router.post(
   sendStatusCodeWithAttribute(200)
 )
 
-router.post('/:id/students', checkCourseExists, async (req, res) => {
-  /*
-  req.body => { add, remove } 
-  */ 
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  // TODO: Add check for add and remove not being null and not being list. Status code 400? 
-
-  let { add, remove } = req.body 
-
-  const userCollection = getMongoCollection('users')
-
-  // TODO: Which order do we add and remove in? Should we handle if userId is in both add and remove? 
-  userCollection.updateMany(
-    { _id: { $in: add || [] }},
-    { $addToSet: { courseIds: req.params.id } }
-  )
-
-  userCollection.updateMany(
-    { _id: { $in: remove || [] }},
-    { $pull: { courseIds: req.params.id } }
-  )
-
-  res.status(200).send()
-})
-
 function replaceObjectIdWithString(object) {
   object._id = object._id.toString()
   return object 
