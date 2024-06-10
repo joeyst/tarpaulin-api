@@ -3,43 +3,12 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getCourseInfoById, getCourseList, addCourse, CourseSchema } = require('../models/course')
-const { isUserAdmin, isUserInstructor } = require('../lib/jsonwebtoken')
-const { hasRequiredSchemaAttributes, extractSchemaAttributes } = require('../lib/schemaValidation')
+const { getCourseList, CourseSchema } = require('../models/course')
 const { getMongoCollection } = require('../lib/mongo')
 
 const { json2csv } = require('json-2-csv')
 
-// TODO: GET /courses/{id}, PATCH /courses/{id}, DELETE /courses/{id}, GET /courses/{id}/students, POST /courses/{id}/students, GET /courses/{id}/roster, GET /courses/{id}/assignments. 
-
 const resultsPerPage = 10
-
-async function checkCourseExists(req, res, next) {
-  if (!(await getCourseInfoById(req.params.id))) {
-    res.status(404).send()
-  }
-  next()
-}
-
-async function checkUserIsAdmin(req, res, next) {
-  // TODO: Replace req.token with authorization header? 
-  if (!(await isUserAdmin(req.token))) {
-    res.status(403).send()
-  }
-  next()
-}
-
-async function checkRequestBodyAgainstCourseSchema(req, res, next) {
-  if (!hasRequiredSchemaAttributes(req.body, CourseSchema)) {
-    res.status(400).send()
-  }
-  next()
-}
-
-async function appendCourseToBody(req, _, next) {
-  req.course = extractSchemaAttributes(req.body, CourseSchema)
-  next()
-}
 
 router.get('/', async (req, res) => {
   /* page query parameter is 1-indexed, by OpenAPI specifications. */
