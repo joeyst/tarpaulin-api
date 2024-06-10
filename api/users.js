@@ -3,7 +3,7 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
+const { getUserInfoByEmail, isUserPasswordCorrect, UserSchema } = require('../models/user')
 const { isUserAdmin } = require('../lib/jsonwebtoken')
 
 const { checkIsAuthenticated } = require('../lib/append')
@@ -19,14 +19,6 @@ function checkLoginFieldsExist(req, res, next) {
 function checkUserPassword(req, res, next) {
   if (!(await isUserPasswordCorrect(req.user.password, req.user.id))) {
     res.status(401).send()
-  }
-  next()
-}
-
-function checkUserCreateFieldsExist(req, res, next) {
-  const { name, email, password, role } = req.body 
-  if (!name || !email || !password || !role) {
-    res.status(400).send()
   }
   next()
 }
@@ -58,7 +50,7 @@ router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res)
   res.status(200).send({token: getJwtTokenFromUser({ name, email, id })})
 })
 
-router.post('/', checkUserCreateFieldsExist, async (req, res) => {
+router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), async (req, res) => {
   const { name, email, password, role } = req.body
   // TODO: Add check for if email exists already. 
   if (role == "instructor" || role == "admin") {
