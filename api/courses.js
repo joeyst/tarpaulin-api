@@ -89,6 +89,15 @@ router.delete(
   sendStatusCodeWithAttribute(204)
 )
 
+router.get(
+  '/:id/students', 
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  findAndAppendModelsInfoByFilter('users', { courseIds: 'params.id' }, 'users', ['_id']),
+  appendByFunction(obj => obj.id, 'users', 'users'),
+  sendStatusCodeWithAttribute(200, 'users')
+)
+
 router.get('/:id/students', checkCourseExists, async (req, res) => {
   const courseInfo = await getCourseInfoById(req.params.id)
   if (!(
