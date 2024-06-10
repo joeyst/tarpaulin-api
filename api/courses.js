@@ -98,6 +98,28 @@ router.get(
   sendStatusCodeWithAttribute(200, 'users')
 )
 
+router.post(
+  '/:id/students',
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  async (req, _, next) => {
+    const userCollection = getMongoCollection('users')
+
+    // TODO: Which order do we add and remove in? Should we handle if userId is in both add and remove? 
+    userCollection.updateMany(
+      { _id: { $in: add || [] }},
+      { $addToSet: { courseIds: req.params.id } }
+    )
+
+    userCollection.updateMany(
+      { _id: { $in: remove || [] }},
+      { $pull: { courseIds: req.params.id } }
+    )
+    next()
+  },
+  sendStatusCodeWithAttribute(200)
+)
+
 router.post('/:id/students', checkCourseExists, async (req, res) => {
   /*
   req.body => { add, remove } 
