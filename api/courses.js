@@ -133,8 +133,15 @@ router.get(
   sendStatusCodeWithAttribute(200, 'data')
 )
 
-router.get('/courses/:id/assignments', checkCourseExists, async (req, res) => {
+router.get(
   // TODO: Spec doesn't say requires authorization. It may be a good idea to have authorization here? 
+  '/:id/assignments',
+  findAndAppendModelsInfoByFilter('assignments', { courseId: 'params.id' }, 'assignments', ['_id']),
+  setByFunction(assignment => assignment.id, 'assignments', 'assignments'),
+  sendStatusCodeWithAttribute(200, 'assignments')
+)
+
+router.get('/courses/:id/assignments', checkCourseExists, async (req, res) => {
   await getMongoCollection('assignments')
     .find({ courseId: req.params.id }, { courseId: 0, title: 0, points: 0, due: 0 })
     .map(result => result._id).toArray()
