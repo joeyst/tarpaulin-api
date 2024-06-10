@@ -89,13 +89,6 @@ router.delete(
   sendStatusCodeWithAttribute(204)
 )
 
-router.delete('/:id', checkCourseExists, checkUserIsAdmin, async (req, res) => {
-  // TODO: Add deletion. 
-  // TODO: Add delete assignments in course. 
-  // TODO: Add delete courseId from user courseIds attribute. 
-  res.status(204).send()
-})
-
 router.get('/:id/students', checkCourseExists, async (req, res) => {
   const courseInfo = await getCourseInfoById(req.params.id)
   if (!(
