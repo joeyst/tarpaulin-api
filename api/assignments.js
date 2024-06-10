@@ -4,51 +4,11 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getCourseInfoById, isCourseIdInUserCourseIds } = require('../models/course')
-const { getAssignmentInfoById, AssignmentSchema, SubmissionSchema } = require('../models/assignment')
-const { isUserExistsById } = require('../models/user')
-const { isUserAdmin, isUserInstructor, isUserStudent, isUserLoggedIn } = require('../lib/jsonwebtoken')
-const { extractSchemaAttributes } = require('../lib/schemaValidation')
-const { getMongoCollection } = require('../lib/mongo')
-
-const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction, appendByVariable } = require('../lib/append')
+const { AssignmentSchema, SubmissionSchema } = require('../models/assignment')
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, 
+  checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction } = require('../lib/append')
 
 const resultsPerPage = 10
-
-async function checkAssignmentExists(req, res, next) {
-  if (!(await getAssignmentInfoById(req.params.id))) {
-    res.status(404).send()
-  }
-  next()
-}
-
-async function checkUserIsAdminOrInstructorOfCourse(req, res, next) {
-  const { courseId } = await getAssignmentInfoById(req.params.id)
-  const courseInfo = await getCourseInfoById(courseId)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-  next()
-}
-
-async function appendAssignmentToBody(req, _, next) {
- req.assignment = extractSchemaAttributes(req.body, AssignmentSchema)
- next()
-}
-
-function replaceObjectIdWithString(object) {
-  object._id = object._id.toString()
-  return object 
-}
-
-function convertUnderscoreIdToId(object) {
-  object.id = object._id
-  delete object._id
-  return object
-}
 
 router.post(
   '/', 
