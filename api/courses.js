@@ -73,6 +73,22 @@ router.patch(
   sendStatusCodeWithAttribute(200)
 )
 
+router.delete(
+  '/:id',
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  checkIsAuthenticated(['admin']),
+  deleteModelsByFilter('courses', { _id: 'params.id' }), // TODO: Does store instructorId etc. as a string? Gets as string. 
+  findAndAppendModelsInfoByFilter('assignments', { courseId: 'params.id' }, 'assignments', ['_id']),
+  deleteModelsByFilter('assignments', { courseId: 'params.id' }),
+  deleteModelsByFilter('submissions' { assignmentId: 'assignmentIds' }),
+  async (req, _, next) => {
+    await getMongoCollection('users')
+      .updateMany({}, { $pull: { courseIds: req.params.id } })
+    next()
+  },
+  sendStatusCodeWithAttribute(204)
+)
+
 router.delete('/:id', checkCourseExists, checkUserIsAdmin, async (req, res) => {
   // TODO: Add deletion. 
   // TODO: Add delete assignments in course. 
