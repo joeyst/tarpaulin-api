@@ -5,6 +5,8 @@ const router = Router()
 
 const { getCourseList, CourseSchema } = require('../models/course')
 const { getMongoCollection } = require('../lib/mongo')
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, 
+  checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, appendByFunction, updateModelsByFilter, deleteModelsByFilter } = require('../lib/append')
 
 const { json2csv } = require('json-2-csv')
 
@@ -49,7 +51,7 @@ router.delete(
   deleteModelsByFilter('courses', { _id: 'params.id' }), // TODO: Does store instructorId etc. as a string? Gets as string. 
   findAndAppendModelsInfoByFilter('assignments', { courseId: 'params.id' }, 'assignments', ['_id']),
   deleteModelsByFilter('assignments', { courseId: 'params.id' }),
-  deleteModelsByFilter('submissions' { assignmentId: 'assignmentIds' }),
+  deleteModelsByFilter('submissions', { assignmentId: 'assignmentIds' }),
   async (req, _, next) => {
     await getMongoCollection('users')
       .updateMany({}, { $pull: { courseIds: req.params.id } })
@@ -106,7 +108,7 @@ router.get(
   // TODO: Spec doesn't say requires authorization. It may be a good idea to have authorization here? 
   '/:id/assignments',
   findAndAppendModelsInfoByFilter('assignments', { courseId: 'params.id' }, 'assignments', ['_id']),
-  setByFunction(assignment => assignment.id, 'assignments', 'assignments'),
+  appendByFunction(assignment => assignment.id, 'assignments', 'assignments'),
   sendStatusCodeWithAttribute(200, 'assignments')
 )
 

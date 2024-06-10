@@ -1,6 +1,7 @@
 const express = require('express')
 const rateLimiter = require('./lib/rateLimiter')
 const morgan = require('morgan')
+const { appendJwtLoginInfo } = require('./lib/append')
 
 const api = require('./api')
 const { connectToDb } = require('./lib/mongo')

@@ -6,7 +6,7 @@ const router = Router()
 
 const { AssignmentSchema, SubmissionSchema } = require('../models/assignment')
 const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, 
-  checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction } = require('../lib/append')
+  checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction, updateModelsByFilter, deleteModelsByFilter } = require('../lib/append')
 
 const resultsPerPage = 10
 
