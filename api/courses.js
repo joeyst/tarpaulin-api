@@ -120,17 +120,6 @@ router.post(
   sendStatusCodeWithAttribute(200)
 )
 
-function replaceObjectIdWithString(object) {
-  object._id = object._id.toString()
-  return object 
-}
-
-function convertUnderscoreIdToId(object) {
-  object.id = object._id
-  delete object._id
-  return object
-}
-
 router.get(
   '/:id/roster',
   findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
