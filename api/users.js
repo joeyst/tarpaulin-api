@@ -3,19 +3,10 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { checkRequestIdMatchesTokenId, addUserInfoToRequest } = require('../lib/jsonwebtoken')
-const { getUserInfoById, getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
+const { getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
 const { isUserAdmin } = require('../lib/jsonwebtoken')
 
-const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction, appendByVariable } = require('../lib/append')
-
-async function checkUserExists(req, res, next) {
-  if (!!(await getUserInfoById(req.params.id))) {
-    next()
-  } else {
-    res.status(404).send("User not found.")
-  }
-}
+const { checkIsAuthenticated } = require('../lib/append')
 
 function checkLoginFieldsExist(req, res, next) {
   const { email, password } = req.body
