@@ -7,6 +7,8 @@ const { checkRequestIdMatchesTokenId, addUserInfoToRequest } = require('../lib/j
 const { getUserInfoById, getUserInfoByEmail, isUserPasswordCorrect } = require('../models/user')
 const { isUserAdmin } = require('../lib/jsonwebtoken')
 
+const { checkAndAppendSchemaAttributes, findAndAppendModelInfoByFilter, findAndAppendModelsInfoByFilter, checkIsAuthenticated, insertModelAndAppendId, sendStatusCodeWithAttribute, checkIsCondition, appendByFunction, appendByVariable } = require('../lib/append')
+
 async function checkUserExists(req, res, next) {
   if (!!(await getUserInfoById(req.params.id))) {
     next()
@@ -37,6 +39,26 @@ function checkUserCreateFieldsExist(req, res, next) {
   }
   next()
 }
+
+router.get(
+  '/:id',
+  checkIsAuthenticated(['student', 'params', 'id'], ['instructor', 'params', 'id']),
+  async (req, res) => {
+    /*
+    Fetches data about a specific User. 
+    case User role:
+      "student"    => list of courses student is enrolled in | Gets User courseIds attribute 
+      "instructor" => list of courses instructor teaches     | Filters Courses by User instructorId 
+    */
+    if (req.user.role === "instructor") {
+      const courseCollection = getMongoCollection("courses")
+      res.status(200).send(await courseCollection.find({ instructorId: req.params.id })).map(course => course._id).toArray()
+    } else {
+      const userCollection = getMongoCollection("users")
+      res.status(200).send((await userCollection.findOne({ _id: req.params.id })).courseIds)
+    }
+  }
+)
 
 router.get('/:id', addUserInfoToRequest, checkRequestIdMatchesTokenId, checkUserExists, async (req, res) => {
   /*
