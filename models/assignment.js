@@ -2,10 +2,10 @@ const { ObjectId } = require('mongodb')
 const { getMongoCollection } = require('../lib/mongo')
 
 const AssignmentSchema = {
-  courseId: { require: true },
-  title: { require: true },
-  points: { require: true },
-  due: { require: true }
+  courseId: { required: true },
+  title: { required: true },
+  points: { required: true },
+  due: { required: true }
 }
 
 async function getAssignmentInfoById(id) {
@@ -14,11 +14,11 @@ async function getAssignmentInfoById(id) {
 }
 
 const SubmissionSchema = {
-  assignmentId: { require: true },
-  studentId: { require: true },
-  timestamp: { require: true },
-  grade: { require: true }
-  file: { require: true }
+  assignmentId: { required: true },
+  studentId: { required: true },
+  timestamp: { required: true },
+  grade: { required: true },
+  file: { required: true }
 }
 
 module.exports = {

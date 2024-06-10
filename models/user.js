@@ -4,7 +4,7 @@ const { getMongoCollection } = require('../lib/mongo')
 const { getPasswordHashed, comparePassword } = require('../lib/bcrypt')
 
 const UserSchema = {
-  name: { require: true },
+  name: { required: true },
   email: { required: true },
   password: { required: true },
   role: { required: true },

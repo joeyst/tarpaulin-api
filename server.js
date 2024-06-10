@@ -13,6 +13,7 @@ app.use(morgan('dev')) // Logging
 app.use(express.json()) // Parsing requests to JSON 
 app.use(express.static('public')) // Serving files in public directory 
 
+app.use('/', appendJwtLoginInfo)
 app.use('/', api) // URLs
 app.use('*', function (req, res, next) { // Catch all for missing pages 
   res.status(404).json({

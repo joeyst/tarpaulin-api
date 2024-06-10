@@ -6,7 +6,12 @@ const router = Router()
 const { getUserInfoByEmail, isUserPasswordCorrect, UserSchema } = require('../models/user')
 const { isUserAdmin } = require('../lib/jsonwebtoken')
 
-const { checkIsAuthenticated } = require('../lib/append')
+const { checkIsAuthenticated, checkAndAppendSchemaAttributes } = require('../lib/append')
+
+const UserLoginSchema = { 
+  email: { required: true},
+  password: { required: true }
+}
 
 router.get(
   '/:id',

@@ -2,11 +2,11 @@ const { ObjectId } = require('mongodb')
 const { getMongoCollection } = require('../lib/mongo')
 
 const CourseSchema = {
-  subject: { require: true },
-  number: { require: true },
-  title: { require: true },
-  term: { require: true },
-  instructorId: { require: true}
+  subject: { required: true },
+  number: { required: true },
+  title: { required: true },
+  term: { required: true },
+  instructorId: { required: true}
 }
 
 async function getCourseInfoById(id) {
