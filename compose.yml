@@ -1,0 +1,17 @@
+services:
+  database:
+    image: mongo
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    networks: 
+      - mongo-net 
+
+  api:
+    build: .
+    ports:
+      - ${API_PORT}:${API_PORT}
+    networks: 
+    - mongo-net
+
+networks:
+  mongo-net: 
