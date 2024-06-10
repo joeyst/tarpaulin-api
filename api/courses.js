@@ -98,22 +98,6 @@ router.get(
   sendStatusCodeWithAttribute(200, 'users')
 )
 
-router.get('/:id/students', checkCourseExists, async (req, res) => {
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  const studentIds = await getMongoCollection('users')
-    .find({ courseIds: req.params.id }, { name: 0, email: 0, password: 0, role: 0, courseIds: 0 }).toArray()
-    .then(results => results.map(result => result._id))
-
-  res.status(200).send(studentIds)
-})
-
 router.post('/:id/students', checkCourseExists, async (req, res) => {
   /*
   req.body => { add, remove } 
