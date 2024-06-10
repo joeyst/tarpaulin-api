@@ -36,14 +36,18 @@ router.get(
 router.post(
   '/login', 
   checkAndAppendSchemaAttributes('body', 'user', UserLoginSchema),
-  checkUserPassword, 
   async (req, res) => {
     const userInfo = await getMongoCollection('users').findOne({ email })
+    if (!userInfo) {
+      res.status(400).send()
+      return
+    }
     if (!(await isUserPasswordCorrect(password, userInfo._id.toString()))) {
       res.status(401).send()
+      return
     }
     /* Sends {token: ...}. */
-    const { name, email, _id: id } = getUserInfoByEmail(req.user.email)
+    const { name, email, _id: id } = userInfo
     res.status(200).send({ token: getJwtTokenFromUser({ name, email, id } )})
 })
 
