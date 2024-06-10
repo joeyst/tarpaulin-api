@@ -8,21 +8,6 @@ const { isUserAdmin } = require('../lib/jsonwebtoken')
 
 const { checkIsAuthenticated } = require('../lib/append')
 
-function checkLoginFieldsExist(req, res, next) {
-  const { email, password } = req.body
-  if (!email || !password) {
-    res.status(400).send()
-  } 
-  next()
-}
-
-function checkUserPassword(req, res, next) {
-  if (!(await isUserPasswordCorrect(req.user.password, req.user.id))) {
-    res.status(401).send()
-  }
-  next()
-}
-
 router.get(
   '/:id',
   checkIsAuthenticated(['student', 'params', 'id'], ['instructor', 'params', 'id']),
@@ -43,11 +28,18 @@ router.get(
   }
 )
 
-router.post('/login', checkLoginFieldsExist, checkUserPassword, async (req, res) => {
-  // TODO: Add check that User with email exists with 401 status response.
-  /* Sends {token: ...}. */
-  const { name, email, _id: id } = getUserInfoByEmail(req.user.email)
-  res.status(200).send({token: getJwtTokenFromUser({ name, email, id })})
+router.post(
+  '/login', 
+  checkAndAppendSchemaAttributes('body', 'user', UserLoginSchema),
+  checkUserPassword, 
+  async (req, res) => {
+    const userInfo = await getMongoCollection('users').findOne({ email })
+    if (!(await isUserPasswordCorrect(password, userInfo._id.toString()))) {
+      res.status(401).send()
+    }
+    /* Sends {token: ...}. */
+    const { name, email, _id: id } = getUserInfoByEmail(req.user.email)
+    res.status(200).send({ token: getJwtTokenFromUser({ name, email, id } )})
 })
 
 router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), async (req, res) => {

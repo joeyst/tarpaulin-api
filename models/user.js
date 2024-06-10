@@ -28,7 +28,7 @@ async function addUser(userObject): Promise<string> {
 }
 
 async function isUserPasswordCorrect(password, id): Promise<boolean> {
-  const { storedPassword } = await getUserInfoById(id)
+  const { password: storedPassword } = await getUserInfoById(id)
   return comparePassword(password, storedPassword)
 }
 
