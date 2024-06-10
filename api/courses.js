@@ -131,6 +131,19 @@ function convertUnderscoreIdToId(object) {
   return object
 }
 
+router.get(
+  '/:id/roster',
+  findAndAppendModelInfoByFilter('courses', { _id: 'params.id' }, 'course'),
+  checkIsAuthenticated(['admin'], ['instructor', 'course', 'instructorId']),
+  findAndAppendModelsInfoByFilter('users', { courseIds: 'params.id' }, 'users'),
+  appendByFunction(user => [user.id, user.name, user.email], 'users', 'users'),
+  async (req, res, next) => {
+    res.set('Content-Type', 'text/csv')
+    req.data = json2csv(req.users)
+  },
+  sendStatusCodeWithAttribute(200, 'data')
+)
+
 router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
   const courseInfo = await getCourseInfoById(req.params.id)
   if (!(
