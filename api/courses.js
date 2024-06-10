@@ -144,24 +144,6 @@ router.get(
   sendStatusCodeWithAttribute(200, 'data')
 )
 
-router.get('/courses/:id/roster', checkCourseExists, async (req, res) => {
-  const courseInfo = await getCourseInfoById(req.params.id)
-  if (!(
-    await isUserAdmin(req.token) ||
-    await isUserInstructor(req.token) === courseInfo.instructorId
-  )) {
-    res.status(403).send()
-  }
-
-  const students = await getMongoCollection('users')
-    .find({ courseIds: req.params.id }, { password: 0, role: 0, courseIds: 0 }).toArray()
-    .map(replaceObjectIdWithString).map(convertUnderscoreIdToId)
-    .map(result => [result.id, result.name, result.email]).toArray()
-
-  res.set('Content-Type', 'text/csv')
-  res.status(200).send(json2csv(students))
-})
-
 router.get('/courses/:id/assignments', checkCourseExists, async (req, res) => {
   // TODO: Spec doesn't say requires authorization. It may be a good idea to have authorization here? 
   await getMongoCollection('assignments')
