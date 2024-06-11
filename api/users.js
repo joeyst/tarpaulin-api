@@ -3,10 +3,11 @@ const { Router } = require('express')
 
 const router = Router()
 
-const { getUserInfoByEmail, isUserPasswordCorrect, UserSchema } = require('../models/user')
-const { isUserAdmin } = require('../lib/jsonwebtoken')
+const { getUserInfoByEmail, isUserPasswordCorrect, UserSchema, addUser } = require('../models/user')
+const { isUserAdmin, getJwtTokenFromUser } = require('../lib/jsonwebtoken')
 
 const { checkIsAuthenticated, checkAndAppendSchemaAttributes } = require('../lib/append')
+const { getMongoCollection } = require('../lib/mongo')
 
 const UserLoginSchema = { 
   email: { required: true},
@@ -25,7 +26,7 @@ router.get(
     */
     if (req.user.role === "instructor") {
       const courseCollection = getMongoCollection("courses")
-      res.status(200).send(await courseCollection.find({ instructorId: req.params.id })).map(course => course._id).toArray()
+      res.status(200).send(await courseCollection.find({ instructorId: req.params.id }).map(course => course._id).toArray())
     } else {
       const userCollection = getMongoCollection("users")
       res.status(200).send((await userCollection.findOne({ _id: req.params.id })).courseIds)
@@ -37,12 +38,15 @@ router.post(
   '/login', 
   checkAndAppendSchemaAttributes('body', 'user', UserLoginSchema),
   async (req, res) => {
-    const userInfo = await getMongoCollection('users').findOne({ email })
+    const userInfo = await getMongoCollection('users').findOne({ email: req.user.email })
     if (!userInfo) {
       res.status(400).send()
       return
     }
-    if (!(await isUserPasswordCorrect(password, userInfo._id.toString()))) {
+    console.log(`USER: ${req.user.email}`)
+    console.log(`PASSWORD: ${req.user.password}`)
+    console.log(`USERINFO: ${JSON.stringify(userInfo)}`)
+    if (!(await isUserPasswordCorrect(req.user.password, userInfo._id.toString()))) {
       res.status(401).send()
       return
     }
@@ -52,13 +56,14 @@ router.post(
 })
 
 router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), async (req, res) => {
-  if (!["admin", "instructor", "user"].includes(req.user.role)) {
+  if (!["admin", "instructor", "student"].includes(req.user.role)) {
     res.status(400).send()
     return
   }
   else if (
-    (role == "instructor" || role == "admin") &&
-    req.login.role !== "admin"
+    (req.user.role == "instructor" || req.user.role == "admin") &&
+    (!req.login || (req.login.role !== "admin"))
+    // req.login.role !== "admin"
    ) {
     res.status(403).send()
     return
@@ -66,8 +71,9 @@ router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), asy
   const usersCollection = getMongoCollection('users')
   if (await usersCollection.findOne({ email: req.user.email })) {
     res.status(400).send()
+    return
   }
-  const id = await usersCollection.insertOne(req.user)
+  const id = await addUser(req.user)
   res.status(201).send({ id })
 })
 

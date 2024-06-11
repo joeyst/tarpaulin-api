@@ -7,7 +7,7 @@ const api = require('./api')
 const { connectToDb } = require('./lib/mongo')
 
 const app = express()
-const port = process.env.PORT || 8000
+const port = process.PORT || 8000
 
 app.use(rateLimiter)
 app.use(morgan('dev')) // Logging 

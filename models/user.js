@@ -27,6 +27,17 @@ async function addUser(userObject) {
     .then(result => result.insertedId.toString())
 }
 
+async function addUsers(userObjects) {
+  // update(obj, 'name', (value) => value.toUpperCase())
+  // userObjects = userObjects.map(
+  for (let i = 0; i < userObjects.length; i++) {
+    userObjects[i].password = getPasswordHashed(userObjects[i].password)
+  }
+  console.log(`userObjects: ${JSON.stringify(userObjects)}`)
+  return await getMongoCollection('users')
+    .insertMany(userObjects)
+}
+
 async function isUserPasswordCorrect(password, id) {
   const { password: storedPassword } = await getUserInfoById(id)
   return comparePassword(password, storedPassword)
@@ -42,5 +53,6 @@ module.exports = {
   getUserInfoByEmail,
   addUser,
   isUserPasswordCorrect,
-  isUserExistsById
+  isUserExistsById,
+  addUsers
 }

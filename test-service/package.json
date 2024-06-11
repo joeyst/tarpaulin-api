@@ -1,0 +1,12 @@
+{
+  "name": "test-service",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "mocha tests/*.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "chai": "^4.3.4",
+    "mocha": "^8.4.0"
+  }
+}

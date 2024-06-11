@@ -18,7 +18,7 @@
 
 const { connectToDb, getDbReference, closeDbConnection } = require('./lib/mongo')
 const { extractSchemaAttributes } = require('./lib/schemaValidation')
-const { UserSchema } = require('./models/user')
+const { UserSchema, addUsers } = require('./models/user')
 
 const usersData = require('./data/users.json')
 
@@ -33,10 +33,7 @@ connectToDb(async function () {
     return extractSchemaAttributes(user, UserSchema)
   })
   // = = = bulkInsertNewBusinesses (adapted) 
-  const db = getDbReference()
-  const collection = db.collection('users')
-  const result = await collection.insertMany(usersToInsert)
-  const ids = result.insertedIds
+  const ids = await addUsers(usersToInsert)
 
   // const ids = await bulkInsertNewBusinesses(businessData)
   console.log("== Inserted businesses with IDs:", ids)
