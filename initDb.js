@@ -17,20 +17,26 @@
  */
 
 const { connectToDb, getDbReference, closeDbConnection } = require('./lib/mongo')
-// const { bulkInsertNewBusinesses } = require('./models/business')
 
-// const businessData = require('./data/businesses.json')
+const usersData = require('./data/users.json')
 
 const mongoCreateUser = process.env.MONGO_CREATE_USER
 const mongoCreatePassword = process.env.MONGO_CREATE_PASSWORD
-const mongoDbName = process.env.MONGO_DB_NAME
 
 connectToDb(async function () {
   /*
    * Insert initial business data into the database
    */
+  const usersToInsert = usersData.map(function (user) {
+    return extractValidFields(user, UserSchema)
+  })
+  const db = getDbReference()
+  const collection = db.collection('users')
+  const result = await collection.insertMany(usersToInsert)
+  const ids = result.insertedIds
+
   // const ids = await bulkInsertNewBusinesses(businessData)
-  // console.log("== Inserted businesses with IDs:", ids)
+  console.log("== Inserted businesses with IDs:", ids)
 
   /*
    * Create a new, lower-privileged database user if the correct environment
@@ -38,9 +44,10 @@ connectToDb(async function () {
    */
   if (mongoCreateUser && mongoCreatePassword) {
     const db = getDbReference()
-    const result = await db.addUser(mongoCreateUser, mongoCreatePassword, {
-      roles: [{ role: "readWrite", db: mongoDbName }]
-    })
+    const result = await db.addUser(mongoCreateUser, mongoCreatePassword, [
+      roles: {
+      role: "readWrite", db: ""
+    }])
     console.log("== New user created:", result)
   }
 

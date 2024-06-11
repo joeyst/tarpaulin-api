@@ -1,30 +1,121 @@
+# services:
+#   db:
+#     image: mongo
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+#       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+#       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+#     restart: on-failure
+#     networks:
+#       - businessnetwork
+# 
+#   db-init:
+#     build: .
+#     environment:
+#       MONGO_HOST: db
+#       MONGO_USER: ${MONGO_ROOT_USER}
+#       MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD}
+#       MONGO_DB_NAME: ${MONGO_DB_NAME}
+#       MONGO_AUTH_DB_NAME: admin
+#       MONGO_CREATE_USER: ${MONGO_USER}
+#       MONGO_CREATE_PASSWORD: ${MONGO_PASSWORD}
+#     depends_on:
+#       - db
+#     restart: on-failure
+#     command: npm run initdb
+#     networks:
+#       - businessnetwork
+# 
+#   api:
+#     build: .
+#     ports:
+#       - 8000:8000
+#     environment:
+#       MONGO_HOST: db
+#       MONGO_USER: ${MONGO_USER}
+#       MONGO_PASSWORD: ${MONGO_PASSWORD}
+#       MONGO_DB_NAME: ${MONGO_DB_NAME}
+#       RABBITMQ_HOST: rabbitmq-server
+#     depends_on:
+#       - db
+#       - db-init
+#     restart: on-failure
+#     command: npm start
+#     networks:
+#       - businessnetwork
+# 
+# networks:
+#   businessnetwork:
+
+
+# services:
+#   db:
+#     image: mongo
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+#       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+#       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+#     restart: on-failure
+#     networks:
+#       - mongo-net
+# 
+#   db-init:
+#     build: .
+#     environment:
+#       MONGO_HOST: db
+#       MONGO_USER: ${MONGO_ROOT_USER}
+#       MONGO_PASSWORD: ${MONGO_ROOT_PASSWORD}
+#       MONGO_DB_NAME: ${MONGO_DB_NAME}
+#       MONGO_AUTH_DB_NAME: admin
+#       MONGO_CREATE_USER: ${MONGO_USER}
+#       MONGO_CREATE_PASSWORD: ${MONGO_PASSWORD}
+#     depends_on:
+#       - db
+#     restart: on-failure
+#     command: npm run initdb
+#     networks:
+#       - mongo-net
+# 
+#   api:
+#     build: .
+#     ports:
+#       - ${API_PORT}:${API_PORT}
+#     environment:
+#       MONGO_HOST: db
+#       MONGO_USER: ${MONGO_USER}
+#       MONGO_PASSWORD: ${MONGO_PASSWORD}
+#       MONGO_DB_NAME: ${MONGO_DB_NAME}
+#       PORT: ${API_PORT}
+#     depends_on:
+#       - db
+#       - db-init
+#     restart: on-failure
+#     command: npm start
+#     networks:
+#       - mongo-net
+# 
+# networks:
+#   mongo-net:
+
 services:
   db:
     image: mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: businesses
-      MONGO_INITDB_ROOT_PASSWORD: hunter2
-      MONGO_INITDB_DATABASE: businesses
-    restart: on-failure
-    networks:
-      - mongo-net
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_AUTH_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_AUTH_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
 
   db-init:
     build: .
     environment:
       MONGO_HOST: db
-      MONGO_USER: businesses
-      MONGO_PASSWORD: hunter2
-      MONGO_DB_NAME: businesses
-      MONGO_AUTH_DB_NAME: hunter2
-      MONGO_CREATE_USER: businesses
-      MONGO_CREATE_PASSWORD: hunter2
+      MONGO_AUTH_USER: ${MONGO_AUTH_USER}
+      MONGO_AUTH_PASSWORD: ${MONGO_AUTH_PASSWORD}
+      MONGO_AUTH_DB_NAME: ${MONGO_AUTH_DB_NAME}
     depends_on:
       - db
     restart: on-failure
     command: npm run initdb
-    networks:
-      - mongo-net
 
   api:
     build: .
@@ -32,17 +123,10 @@ services:
       - 8000:8000
     environment:
       MONGO_HOST: db
-      MONGO_USER: businesses
-      MONGO_PASSWORD: hunter2
-      MONGO_DB_NAME: businesses
-      MONGO_AUTH_DB_NAME: businesses
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
     depends_on:
       - db
       - db-init
     restart: on-failure
-    command: npm start
-    networks:
-      - mongo-net
-
-networks:
-  mongo-net:
