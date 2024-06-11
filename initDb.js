@@ -30,7 +30,7 @@ connectToDb(async function () {
    * Insert initial business data into the database
    */
   const usersToInsert = usersData.map(function (user) {
-    return extractSchemaAttributes(user, UserSchema)
+    return extractSchemaAttributes(user, Object.assign(UserSchema, { _id: { required: true } }))
   })
   // = = = bulkInsertNewBusinesses (adapted) 
   const ids = await addUsers(usersToInsert)

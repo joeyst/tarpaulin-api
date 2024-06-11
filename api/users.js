@@ -63,7 +63,6 @@ router.post('/', checkAndAppendSchemaAttributes('body', 'user', UserSchema), asy
   else if (
     (req.user.role == "instructor" || req.user.role == "admin") &&
     (!req.login || (req.login.role !== "admin"))
-    // req.login.role !== "admin"
    ) {
     res.status(403).send()
     return

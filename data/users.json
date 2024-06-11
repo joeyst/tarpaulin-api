@@ -1,16 +1,16 @@
 [
   {
-    "id": 1,
-    "name": "name1",
-    "email": "email1",
-    "password": "password1",
-    "role": "role1"
+    "name": "student5",
+    "email": "email5",
+    "password": "password5",
+    "role": "student",
+    "_id": "6668d10b2e2cd99aa78fbfa2"
   },
   {
-    "id": 2,
-    "name": "name2",
-    "email": "email2",
-    "password": "password2",
-    "role": "role2"
+    "name": "instructor6",
+    "email": "email6",
+    "password": "password6",
+    "role": "instructor",
+    "_id": "6668d10b2e2cd99aa78fbfa3"
   }
 ]

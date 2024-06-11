@@ -7,8 +7,8 @@ const { expect } = require('chai')
 describe('POST /users/login', () => {
   it('should log in with valid credentials', async () => {
     const loginData = {
-      email: 'email1',
-      password: 'password1'
+      email: 'email5',
+      password: 'password5'
     }
 
     try {
@@ -22,8 +22,8 @@ describe('POST /users/login', () => {
 
   it('should return an error with invalid credentials', async () => {
     const loginData = {
-      email: 'email1',
-      password: 'password2'
+      email: 'email5',
+      password: 'password6'
     };
 
     try {

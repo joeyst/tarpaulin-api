@@ -32,6 +32,9 @@ async function addUsers(userObjects) {
   // userObjects = userObjects.map(
   for (let i = 0; i < userObjects.length; i++) {
     userObjects[i].password = getPasswordHashed(userObjects[i].password)
+    if (userObjects[i]._id) {
+      userObjects[i]._id = new ObjectId(userObjects[i]._id)
+    }
   }
   console.log(`userObjects: ${JSON.stringify(userObjects)}`)
   return await getMongoCollection('users')
