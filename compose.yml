@@ -131,9 +131,50 @@
 #       - db
 #       - db-init
 #     restart: on-failure
+# 
+# services:
+#   db:
+#     image: mongo
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: root
+#       MONGO_INITDB_ROOT_PASSWORD: hunter2
+#       MONGO_INITDB_DATABASE: admin
+#     ports:
+#       - 27017:27017
+# 
+#   db-init:
+#     build: .
+#     environment:
+#       MONGO_HOST: db
+#       MONGO_USER: businesses
+#       MONGO_PASSWORD: hunter2
+#       MONGO_DB_NAME: businesses
+#       MONGO_AUTH_DB_NAME: admin
+#       MONGO_CREATE_USER: businesses
+#       MONGO_CREATE_PASSWORD: hunter2
+#     depends_on:
+#       - db
+#     restart: on-failure
+#     command: npm run initdb
+# 
+#   api:
+#     build: .
+#     ports:
+#       - 8000:8000
+#     environment:
+#       # MONGO_URI: mongodb://db:27017/businesses
+#       MONGO_HOST: db
+#       MONGO_USER: businesses
+#       MONGO_PASSWORD: hunter2
+#       MONGO_DB_NAME: businesses
+#     depends_on:
+#       - db
+#       - db-init
+#     restart: on-failure
 
-
-# # #
+# 
+# 
+# # # #
 services:
   db:
     image: mongo

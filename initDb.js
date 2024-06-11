@@ -17,6 +17,8 @@
  */
 
 const { connectToDb, getDbReference, closeDbConnection } = require('./lib/mongo')
+const { extractSchemaAttributes } = require('./lib/schemaValidation')
+const { UserSchema } = require('./models/user')
 
 const usersData = require('./data/users.json')
 
@@ -28,8 +30,9 @@ connectToDb(async function () {
    * Insert initial business data into the database
    */
   const usersToInsert = usersData.map(function (user) {
-    return extractValidFields(user, UserSchema)
+    return extractSchemaAttributes(user, UserSchema)
   })
+  // = = = bulkInsertNewBusinesses (adapted) 
   const db = getDbReference()
   const collection = db.collection('users')
   const result = await collection.insertMany(usersToInsert)
@@ -47,10 +50,8 @@ connectToDb(async function () {
 
   if (mongoCreateUser && mongoCreatePassword) {
     const db = getDbReference()
-    const result = await db.createUser({
-      user: "businesses",
-      pwd: "hunter2",
-      roles: [{ role: "readWrite", db: "businesses" }]
+    const result = await db.addUser(mongoCreateUser, mongoCreatePassword, {
+      roles: "readWrite"
     })
     // const result = await db.addUser(mongoCreateUser, mongoCreatePassword, 
     //   { roles: [{ role: "readWrite", db: "businesses" }]})
