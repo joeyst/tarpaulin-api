@@ -42,12 +42,18 @@ connectToDb(async function () {
    * Create a new, lower-privileged database user if the correct environment
    * variables were specified.
    */
+  console.log(`MONGOCREATEUSER: ${mongoCreateUser}`)
+  console.log(`MONGOCREATEPWD: ${mongoCreatePassword}`)
+
   if (mongoCreateUser && mongoCreatePassword) {
     const db = getDbReference()
-    const result = await db.addUser(mongoCreateUser, mongoCreatePassword, [
-      roles: {
-      role: "readWrite", db: ""
-    }])
+    const result = await db.createUser({
+      user: "businesses",
+      pwd: "hunter2",
+      roles: [{ role: "readWrite", db: "businesses" }]
+    })
+    // const result = await db.addUser(mongoCreateUser, mongoCreatePassword, 
+    //   { roles: [{ role: "readWrite", db: "businesses" }]})
     console.log("== New user created:", result)
   }
 
